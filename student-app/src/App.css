@@ -1,0 +1,480 @@
+.join-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.join-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.join-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.join-header h1 {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.join-header p {
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.join-form {
+  padding: 30px 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #c33;
+  font-size: 14px;
+}
+
+.btn-join {
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-join:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-join:active {
+  transform: translateY(0);
+}
+
+.join-footer {
+  background: #f8f9fa;
+  padding: 15px 20px;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #666;
+}
+
+/* Student Dashboard */
+.student-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.disconnected-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.disconnected-screen h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.disconnected-screen p {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.disconnected-screen .student-info {
+  font-size: 14px;
+  margin-top: 30px;
+}
+
+.student-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-content h1 {
+  color: #333;
+  font-size: 20px;
+  margin: 0;
+}
+
+.connection-status {
+  color: #27ae60;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-info-bar {
+  background: #667eea;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 1;
+  min-width: 100px;
+  padding: 15px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #667eea;
+  background: #f8f9fa;
+}
+
+.tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.student-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.class-view {
+  width: 100%;
+  max-width: 600px;
+}
+
+.poll-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 30px 20px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.poll-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.poll-header h2 {
+  color: #333;
+  font-size: 20px;
+}
+
+.poll-question {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.poll-option-btn {
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.poll-option-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.poll-option-btn:active {
+  transform: translateY(0);
+}
+
+.option-indicator {
+  font-size: 18px;
+}
+
+.poll-instruction {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  margin-top: 15px;
+}
+
+.waiting-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting-message {
+  text-align: center;
+  background: white;
+  padding: 40px 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.waiting-message p {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 14px !important;
+  color: #999 !important;
+}
+
+.ppt-placeholder,
+.transcription-placeholder {
+  background: white;
+  padding: 40px 20px;
+  border-radius: 15px;
+  text-align: center;
+  color: #999;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ppt-placeholder p,
+.transcription-placeholder p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.ppt-placeholder a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.ppt-viewer {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 200px);
+}
+
+.ppt-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ppt-iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+}
+
+.transcription-viewer {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.transcription-note {
+  padding: 12px;
+  margin-bottom: 12px;
+  border-left: 4px solid #667eea;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.transcription-note:last-child {
+  margin-bottom: 0;
+}
+
+.note-time {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.note-text {
+  color: #333;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .student-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .tab {
+    min-width: 80px;
+    font-size: 12px;
+    padding: 12px 8px;
+  }
+
+  .student-content {
+    padding: 15px;
+  }
+
+  .poll-card {
+    padding: 20px 15px;
+  }
+
+  .poll-question {
+    font-size: 16px;
+  }
+
+  .poll-option-btn {
+    font-size: 14px;
+    padding: 12px 15px;
+  }
+
+  .ppt-iframe {
+    height: 400px;
+  }
+}
+
+/* Scrollbar styling */
+.student-content::-webkit-scrollbar,
+.transcription-viewer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.student-content::-webkit-scrollbar-track,
+.transcription-viewer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.student-content::-webkit-scrollbar-thumb,
+.transcription-viewer::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.student-content::-webkit-scrollbar-thumb:hover,
+.transcription-viewer::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
