@@ -5,6 +5,7 @@ function Transcription({ socket, classId }) {
   const [isRecording, setIsRecording] = useState(false);
   const [manualText, setManualText] = useState('');
   const transcriptionRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -28,6 +29,15 @@ function Transcription({ socket, classId }) {
     }
   }, [transcriptions]);
 
+  useEffect(() => {
+    return () => {
+      // Cleanup: stop recording when component unmounts
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
   const addManualTranscription = () => {
     if (manualText.trim() && socket && classId) {
       socket.emit('add-transcription', {
@@ -46,7 +56,7 @@ function Transcription({ socket, classId }) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
     recognition.language = 'en-US';
 
@@ -70,14 +80,25 @@ function Transcription({ socket, classId }) {
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
     };
 
     recognition.onend = () => {
       setIsRecording(false);
       console.log('Recording ended');
+      recognitionRef.current = null;
     };
 
+    recognitionRef.current = recognition;
     recognition.start();
+  };
+
+  const stopAudioTranscription = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
   };
 
   return (
@@ -103,10 +124,10 @@ function Transcription({ socket, classId }) {
               Add Text
             </button>
             <button 
-              onClick={startAudioTranscription}
+              onClick={isRecording ? stopAudioTranscription : startAudioTranscription}
               className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'}`}
             >
-              {isRecording ? '🎙️ Recording...' : '🎙️ Record Voice'}
+              {isRecording ? '⏹️ Stop Recording' : '🎙️ Record Voice'}
             </button>
           </div>
         </div>
