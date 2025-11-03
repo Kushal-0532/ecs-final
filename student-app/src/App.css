@@ -263,16 +263,14 @@ body {
 }
 
 .header-content h1 {
-  background: linear-gradient(135deg, var(--primary-green) 0%, var(--teal-accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 22px;
+  color: var(--text-primary);
+  font-size: 24px;
   margin: 0;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 10px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .header-content h1 svg {

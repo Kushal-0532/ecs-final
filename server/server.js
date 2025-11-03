@@ -149,6 +149,10 @@ io.on('connection', (socket) => {
         };
         socket.emit('class-started', { class_id: activeClass.id });
         io.emit('class-active', { class_id: activeClass.id });
+        
+        // Send class info to all connected students
+        console.log('Sending class-info to students:', data.class_name);
+        io.to('students-room').emit('class-info', { class_name: data.class_name });
       }
     );
   });
@@ -168,6 +172,16 @@ io.on('connection', (socket) => {
       student_name: data.student_name,
       total_students: connectedStudents.size
     });
+
+    // Send class name to student if class is active
+    if (activeClass) {
+      db.get('SELECT class_name FROM classes WHERE id = ?', [activeClass.id], (err, row) => {
+        if (!err && row) {
+          console.log('Sending class-info to joining student:', row.class_name);
+          socket.emit('class-info', { class_name: row.class_name });
+        }
+      });
+    }
   });
 
   // Teacher shares PPT

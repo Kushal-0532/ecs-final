@@ -11,6 +11,7 @@ function App() {
   const [currentPoll, setCurrentPoll] = useState(null);
   const [pptUrl, setPptUrl] = useState(null);
   const [transcriptions, setTranscriptions] = useState([]);
+  const [className, setClassName] = useState('Class Session');
 
   // Server URL
   const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
@@ -56,6 +57,11 @@ function App() {
         text: data.text,
         timestamp: new Date(data.timestamp)
       }]);
+    });
+
+    newSocket.on('class-info', (data) => {
+      console.log('Class info received:', data.class_name);
+      setClassName(data.class_name);
     });
 
     setSocket(newSocket);
@@ -115,6 +121,11 @@ function App() {
       }]);
     });
 
+    newSocket.on('class-info', (data) => {
+      console.log('Class info received:', data.class_name);
+      setClassName(data.class_name);
+    });
+
     setSocket(newSocket);
     setStudentInfo({
       name: name,
@@ -136,9 +147,12 @@ function App() {
     return <JoinClass onJoinClass={handleJoinClass} />;
   }
 
+  console.log('App rendering StudentDashboard with className:', className);
+
   return (
     <StudentDashboard
       studentInfo={studentInfo}
+      className={className}
       classActive={classActive}
       currentPoll={currentPoll}
       pptUrl={pptUrl}
