@@ -23,6 +23,7 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Create uploads directory
 fs.ensureDirSync(path.join(__dirname, 'uploads'));
@@ -382,6 +383,32 @@ app.get('/api/class/:classId', (req, res) => {
 
     res.json(classData);
   });
+});
+
+// Download file endpoint
+app.get('/api/download/:filename', (req, res) => {
+  const filename = decodeURIComponent(req.params.filename);
+  const filePath = path.join(__dirname, 'uploads', filename);
+  
+  // Check if file exists
+  if (!fs.existsSync(filePath)) {
+    console.log('File not found:', filePath);
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  // Set headers for download
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  
+  // Stream the file
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.on('error', (err) => {
+    console.error('Error streaming file:', err);
+    res.status(500).json({ error: 'Error downloading file' });
+  });
+  fileStream.pipe(res);
 });
 
 // Get poll results

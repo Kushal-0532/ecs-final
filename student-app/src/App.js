@@ -12,10 +12,12 @@ function App() {
   const [pptUrl, setPptUrl] = useState(null);
   const [transcriptions, setTranscriptions] = useState([]);
 
+  // Server URL
+  const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
+
   useEffect(() => {
-    // Connect to server - use REACT_APP_SERVER_URL env var or default to localhost
-    const defaultServerUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
-    const newSocket = io(defaultServerUrl, {
+    // Connect to server
+    const newSocket = io(serverUrl, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
@@ -38,7 +40,7 @@ function App() {
 
     newSocket.on('ppt-received', (data) => {
       console.log('PPT received:', data.filename);
-      setPptUrl(data.url);
+      setPptUrl(`${serverUrl}${data.url}`);
     });
 
     newSocket.on('class-ended', () => {

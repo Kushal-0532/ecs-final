@@ -27,7 +27,7 @@ function PPTViewer({ url }) {
       )}
       {!isImage && !isPDF && (
         <div className="ppt-placeholder">
-          <p>Download: <a href={url} target="_blank" rel="noopener noreferrer">{url}</a></p>
+          <p>Download: <a href={`http://localhost:3000/api/download/${encodeURIComponent(url.split('/').pop())}`} download>{url.split('/').pop()}</a></p>
         </div>
       )}
     </div>
