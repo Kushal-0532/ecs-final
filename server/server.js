@@ -7,6 +7,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
+import { initLED, quickBlink, slowBlink, doubleBlink, cleanup } from './gpio.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -120,6 +121,9 @@ function initializeDatabase() {
   });
 }
 
+// Initialize LED controller
+initLED();
+
 // Store active class and connected sockets
 let activeClass = null;
 const connectedStudents = new Map();
@@ -147,6 +151,10 @@ io.on('connection', (socket) => {
           teacher_id: data.teacher_id,
           status: 'active'
         };
+
+        // Blink LED: Class started (3x slow)
+        slowBlink(3, `Class started: ${data.class_name}`);
+
         socket.emit('class-started', { class_id: activeClass.id });
         io.emit('class-active', { class_id: activeClass.id });
         
@@ -172,6 +180,9 @@ io.on('connection', (socket) => {
       student_name: data.student_name,
       total_students: connectedStudents.size
     });
+
+    // Blink LED: Student joins (1x quick)
+    quickBlink(1, `Student joined: ${data.student_name}`);
 
     // Send class name to student if class is active
     if (activeClass) {
@@ -221,6 +232,9 @@ io.on('connection', (socket) => {
           options: data.options
         };
 
+        // Blink LED: Poll created (2x quick - double blink)
+        doubleBlink(`Poll created: ${data.question}`);
+
         // Broadcast to all students
         io.to('students-room').emit('poll-received', poll);
         io.to('teacher-room').emit('poll-created', poll);
@@ -241,6 +255,9 @@ io.on('connection', (socket) => {
           console.error('Error saving poll response:', err);
           return;
         }
+
+        // Blink LED: Poll response received (1x quick)
+        quickBlink(1, `Poll response from ${student.student_name}: ${data.answer}`);
 
         // Get poll results
         db.all(
@@ -305,6 +322,9 @@ io.on('connection', (socket) => {
           return;
         }
         
+        // Blink LED: Transcription added (1x quick)
+        quickBlink(1, `Transcription added: ${data.text.substring(0, 50)}...`);
+        
         io.emit('transcription-added', {
           text: data.text,
           timestamp: new Date()
@@ -325,6 +345,9 @@ io.on('connection', (socket) => {
           console.error('Error ending class:', err);
           return;
         }
+
+        // Blink LED: Class ended (3x slow)
+        slowBlink(3, 'Class ended');
 
         io.emit('class-ended', { class_id: activeClass.id });
         
@@ -471,4 +494,17 @@ app.get('/api/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Classroom server running on http://0.0.0.0:${PORT}`);
+});
+
+// Cleanup on exit
+process.on('SIGINT', () => {
+  console.log('\nShutting down server...');
+  cleanup();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\nShutting down server...');
+  cleanup();
+  process.exit(0);
 });

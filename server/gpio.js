@@ -1,0 +1,118 @@
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * GPIO LED Controller for Raspberry Pi
+ * Uses built-in LEDs controlled via /sys/class/leds/
+ * 
+ * Safe on non-RPi machines (gracefully skips if LED path doesn't exist)
+ */
+
+// Common RPi LED paths
+const LED_PATHS = {
+  red: '/sys/class/leds/led0',        // Built-in red LED (older RPis)
+  green: '/sys/class/leds/led1',      // Built-in green LED (older RPis)
+  pwr: '/sys/class/leds/ACT',         // Activity LED (RPi 4+)
+  activity: '/sys/class/leds/activity' // Alternative activity LED path
+};
+
+let activeLedPath = null;
+
+/**
+ * Initialize LED - detect which LED is available
+ */
+export function initLED() {
+  // Try to find an available LED
+  for (const [name, ledPath] of Object.entries(LED_PATHS)) {
+    try {
+      if (fs.existsSync(ledPath) && fs.existsSync(path.join(ledPath, 'brightness'))) {
+        activeLedPath = ledPath;
+        console.log(`✓ LED initialized: ${name} (${ledPath})`);
+        return true;
+      }
+    } catch (err) {
+      // Continue to next LED
+    }
+  }
+  
+  console.log('⚠ No LED detected. Running in simulation mode. (This is normal on non-RPi machines)');
+  return false;
+}
+
+/**
+ * Blink LED with specified pattern
+ * @param {number} count - Number of blinks
+ * @param {number} onDuration - LED on time in ms
+ * @param {number} offDuration - LED off time in ms
+ * @param {string} action - Description of the action (for logging)
+ */
+export async function blink(count = 1, onDuration = 100, offDuration = 100, action = 'Action') {
+  // If no LED detected, log and return
+  if (!activeLedPath) {
+    console.log(`📍 [LED] ${action} (no hardware)`);
+    return;
+  }
+
+  try {
+    const brightnessPath = path.join(activeLedPath, 'brightness');
+    
+    console.log(`💡 [LED] ${action} - ${count}x blink (${onDuration}ms on, ${offDuration}ms off)`);
+
+    for (let i = 0; i < count; i++) {
+      // Turn ON
+      fs.writeFileSync(brightnessPath, '1');
+      await sleep(onDuration);
+
+      // Turn OFF
+      fs.writeFileSync(brightnessPath, '0');
+      await sleep(offDuration);
+    }
+  } catch (err) {
+    console.warn(`⚠ LED blink failed: ${err.message}`);
+  }
+}
+
+/**
+ * Quick blink pattern (fast, single or multiple)
+ * Used for: student joins, poll responses, transcriptions
+ */
+export async function quickBlink(count = 1, action = 'Action') {
+  await blink(count, 100, 100, action);
+}
+
+/**
+ * Slow blink pattern (slow, multiple)
+ * Used for: class start/end
+ */
+export async function slowBlink(count = 3, action = 'Action') {
+  await blink(count, 500, 500, action);
+}
+
+/**
+ * Special pattern for important events
+ */
+export async function doubleBlink(action = 'Action') {
+  await blink(2, 150, 100, action);
+}
+
+/**
+ * Cleanup - turn off LED on exit
+ */
+export function cleanup() {
+  if (activeLedPath) {
+    try {
+      const brightnessPath = path.join(activeLedPath, 'brightness');
+      fs.writeFileSync(brightnessPath, '0');
+      console.log('✓ LED cleaned up');
+    } catch (err) {
+      console.warn(`⚠ LED cleanup failed: ${err.message}`);
+    }
+  }
+}
+
+/**
+ * Helper: sleep function for async delays
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

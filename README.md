@@ -1,6 +1,6 @@
 # Classroom Management System
 
-A complete classroom management platform built on Raspberry Pi, enabling real-time interactive classes with PPT sharing, live polls, audio transcription, and cloud data synchronization.
+A complete classroom management platform built on Raspberry Pi, enabling real-time interactive classes with PPT sharing, live polls, audio transcription, cloud data synchronization, and **visual LED feedback** on classroom actions.
 
 ## 📋 Project Structure
 
@@ -51,6 +51,10 @@ ecs-final/
 │  │  ✓ File Upload Handling (PPT/PDF)   │   │
 │  │  ✓ SQLite Database                  │   │
 │  │  ✓ Poll Management                  │   │
+│  │  ✓ LED Indicators (GPIO)            │   │
+│  │    - Student joins: 1x quick blink  │   │
+│  │    - Poll created: 2x quick blinks  │   │
+│  │    - Class start/end: 3x slow blink │   │
 │  └─────────────────────────────────────┘   │
 │                     ↓                       │
 │  ┌─────────────────────────────────────┐   │
