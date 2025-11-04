@@ -17,7 +17,7 @@ function ClassSession({ classActive, onStartClass, onEndClass, classId, socket }
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:3000/api/upload-ppt', {
+      const response = await fetch('http://10.42.0.185:3000/api/upload-ppt', {
         method: 'POST',
         body: formData
       });

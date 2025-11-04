@@ -10,7 +10,7 @@ import path from 'path';
 
 // Common RPi LED paths
 const LED_PATHS = {
-  red: '/sys/class/leds/led0',        // Built-in red LED (older RPis)
+  // red: '/sys/class/leds/led0',        // Built-in red LED (older RPis) - DISABLED
   green: '/sys/class/leds/led1',      // Built-in green LED (older RPis)
   pwr: '/sys/class/leds/ACT',         // Activity LED (RPi 4+)
   activity: '/sys/class/leds/activity' // Alternative activity LED path
@@ -89,7 +89,7 @@ export async function blink(count = 1, onDuration = 100, offDuration = 100, acti
  * Used for: student joins, poll responses, transcriptions
  */
 export async function quickBlink(count = 1, action = 'Action') {
-  await blink(count, 100, 100, action);
+  await blink(count, 1000, 500, action);  // 1 second on, 0.5 second off
 }
 
 /**
@@ -97,14 +97,14 @@ export async function quickBlink(count = 1, action = 'Action') {
  * Used for: class start/end
  */
 export async function slowBlink(count = 3, action = 'Action') {
-  await blink(count, 500, 500, action);
+  await blink(count, 1000, 1000, action);  // 1 second on/off
 }
 
 /**
  * Special pattern for important events
  */
 export async function doubleBlink(action = 'Action') {
-  await blink(2, 150, 100, action);
+  await blink(2, 1000, 500, action);  // 1 second on, 0.5 second off between blinks
 }
 
 /**
