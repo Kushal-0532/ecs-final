@@ -66,6 +66,13 @@ function App() {
 
     newSocket.on('connect', () => {
       console.log('✅ Connected to server');
+      
+      // Emit student-join to register with the class
+      newSocket.emit('student-join', {
+        student_name: studentInfo.name,
+        student_id: studentInfo.id
+      });
+      console.log(`📨 Sent student-join: ${studentInfo.name}`);
     });
 
     newSocket.on('poll-received', (poll) => {
@@ -102,6 +109,7 @@ function App() {
     newSocket.on('class-info', (data) => {
       console.log('Class info received:', data.class_name);
       setClassName(data.class_name);
+      setClassActive(true);  // ← Set class as active when info is received
     });
 
     setSocket(newSocket);
