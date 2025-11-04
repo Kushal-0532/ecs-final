@@ -42,7 +42,7 @@ export function initLED() {
 /**
  * Blink LED with specified pattern
  * @param {number} count - Number of blinks
- * @param {number} onDuration - LED on time in ms
+ * @param {number} onDuration - LED on time in ms (minimum 1000ms)
  * @param {number} offDuration - LED off time in ms
  * @param {string} action - Description of the action (for logging)
  */
@@ -56,13 +56,16 @@ export async function blink(count = 1, onDuration = 100, offDuration = 100, acti
   try {
     const brightnessPath = path.join(activeLedPath, 'brightness');
     
-    console.log(`💡 [LED] ${action} - ${count}x blink (${onDuration}ms on, ${offDuration}ms off)`);
+    // Enforce minimum 1 second (1000ms) on duration
+    const minOnDuration = Math.max(onDuration, 1000);
+    
+    console.log(`💡 [LED] ${action} - ${count}x blink (${minOnDuration}ms on, ${offDuration}ms off)`);
 
     for (let i = 0; i < count; i++) {
       try {
         // Turn ON
         fs.writeFileSync(brightnessPath, '1');
-        await sleep(onDuration);
+        await sleep(minOnDuration);
 
         // Turn OFF
         fs.writeFileSync(brightnessPath, '0');
