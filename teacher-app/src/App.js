@@ -16,7 +16,24 @@ async function detectServerUrl() {
     return process.env.REACT_APP_SERVER_URL;
   }
 
-  // Priority 2: Try .local hostname (works with mDNS on all networks)
+  // Priority 2: Try direct RPi IP on Ethernet (10.42.0.185)
+  try {
+    console.log('🔍 Trying RPi Ethernet IP (10.42.0.185)...');
+    const response = await Promise.race([
+      fetch('http://10.42.0.185:3000/api/server-info'),
+      new Promise((_, reject) => setTimeout(() => reject('timeout'), 2000))
+    ]);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`✅ Found server at 10.42.0.185 - IP: ${data.serverIp}`);
+      return 'http://10.42.0.185:3000';
+    }
+  } catch (e) {
+    console.log('⚠️ 10.42.0.185 not accessible:', e.message);
+  }
+
+  // Priority 3: Try .local hostname (works with mDNS on all networks)
   try {
     console.log('🔍 Trying raspberrypi.local...');
     const response = await Promise.race([
@@ -33,7 +50,7 @@ async function detectServerUrl() {
     console.log('⚠️ raspberrypi.local not accessible:', e.message);
   }
 
-  // Priority 3: Try localhost (in case server is on same machine)
+  // Priority 4: Try localhost (in case server is on same machine)
   try {
     console.log('🔍 Trying localhost...');
     const response = await Promise.race([
@@ -50,7 +67,7 @@ async function detectServerUrl() {
     console.log('⚠️ localhost not accessible:', e.message);
   }
 
-  // Priority 4: Try common gateway IPs (Raspberry Pi often gets first IP on network)
+  // Priority 5: Try common gateway IPs (Raspberry Pi often gets first IP on network)
   const commonIPs = ['192.168.1.1', '192.168.0.1', '10.0.0.1'];
   for (const ip of commonIPs) {
     try {
@@ -70,10 +87,10 @@ async function detectServerUrl() {
     }
   }
 
-  // Fallback: Default to .local (most likely to work)
-  console.warn('⚠️ Could not detect server. Using default: raspberrypi.local:3000');
+  // Fallback: Default to RPi Ethernet IP
+  console.warn('⚠️ Could not detect server. Using RPi Ethernet IP: 10.42.0.185:3000');
   console.warn('💡 Tip: You can set REACT_APP_SERVER_URL env var to specify server URL');
-  return 'http://raspberrypi.local:3000';
+  return 'http://10.42.0.185:3000';
 }
 
 function App() {

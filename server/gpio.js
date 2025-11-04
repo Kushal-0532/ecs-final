@@ -59,13 +59,25 @@ export async function blink(count = 1, onDuration = 100, offDuration = 100, acti
     console.log(`💡 [LED] ${action} - ${count}x blink (${onDuration}ms on, ${offDuration}ms off)`);
 
     for (let i = 0; i < count; i++) {
-      // Turn ON
-      fs.writeFileSync(brightnessPath, '1');
-      await sleep(onDuration);
+      try {
+        // Turn ON
+        fs.writeFileSync(brightnessPath, '1');
+        await sleep(onDuration);
 
-      // Turn OFF
-      fs.writeFileSync(brightnessPath, '0');
-      await sleep(offDuration);
+        // Turn OFF
+        fs.writeFileSync(brightnessPath, '0');
+        await sleep(offDuration);
+      } catch (writeErr) {
+        // If permission denied, provide helpful guidance
+        if (writeErr.code === 'EACCES') {
+          console.warn(`⚠️ LED Permission Denied (EACCES). The server needs root/sudo to control LEDs.`);
+          console.warn(`   Run: sudo node server.js`);
+          console.warn(`   Or configure udev rules: https://github.com/quick2wire/quick2wire-gpio-admin`);
+          // Don't retry - exit gracefully
+          return;
+        }
+        throw writeErr;
+      }
     }
   } catch (err) {
     console.warn(`⚠ LED blink failed: ${err.message}`);
@@ -105,7 +117,11 @@ export function cleanup() {
       fs.writeFileSync(brightnessPath, '0');
       console.log('✓ LED cleaned up');
     } catch (err) {
-      console.warn(`⚠ LED cleanup failed: ${err.message}`);
+      if (err.code === 'EACCES') {
+        console.log('⚠️ LED cleanup: Permission denied (running without root)');
+      } else {
+        console.warn(`⚠ LED cleanup failed: ${err.message}`);
+      }
     }
   }
 }

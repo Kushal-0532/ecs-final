@@ -7,6 +7,7 @@ import StudentDashboard from './components/StudentDashboard';
 // Auto-detect server URL
 async function detectServerUrl() {
   const candidates = [
+    'http://10.42.0.185:3000',      // RPi Ethernet IP (Priority 1)
     'http://raspberrypi.local:3000',
     'http://localhost:3000',
     'http://192.168.1.1:3000',
@@ -26,8 +27,8 @@ async function detectServerUrl() {
     } catch (e) {}
   }
   
-  console.warn('⚠️ Could not auto-detect server. Using default: raspberrypi.local:3000');
-  return 'http://raspberrypi.local:3000';
+  console.warn('⚠️ Could not auto-detect server. Using RPi Ethernet IP: 10.42.0.185:3000');
+  return 'http://10.42.0.185:3000';
 }
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
   const [pptUrl, setPptUrl] = useState(null);
   const [transcriptions, setTranscriptions] = useState([]);
   const [className, setClassName] = useState('Class Session');
-  const [serverUrl, setServerUrl] = useState('http://raspberrypi.local:3000');
+  const [serverUrl, setServerUrl] = useState('http://10.42.0.185:3000');
 
   // Server URL - use env var or auto-detect
   const finalServerUrl = process.env.REACT_APP_SERVER_URL || serverUrl;
@@ -110,6 +111,14 @@ function App() {
       console.log('Class info received:', data.class_name);
       setClassName(data.class_name);
       setClassActive(true);  // ← Set class as active when info is received
+    });
+
+    newSocket.on('student-waiting', (data) => {
+      console.log('Student waiting status:', data.message);
+      // Student is successfully connected and waiting for teacher to start class
+      // Set classActive to true to show dashboard (but with waiting message)
+      setClassActive(true);
+      setClassName('Waiting for Teacher...');
     });
 
     setSocket(newSocket);

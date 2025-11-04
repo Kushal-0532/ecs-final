@@ -185,13 +185,21 @@ io.on('connection', (socket) => {
     // Blink LED: Student joins (1x quick)
     quickBlink(1, `Student joined: ${data.student_name}`);
 
-    // Send class name to student if class is active
+    // Send class name to student immediately
+    // Even if no class is active, send the student's joined status
     if (activeClass) {
       db.get('SELECT class_name FROM classes WHERE id = ?', [activeClass.id], (err, row) => {
         if (!err && row) {
-          console.log('Sending class-info to joining student:', row.class_name);
-          socket.emit('class-info', { class_name: row.class_name });
+          console.log('Sending active class-info to joining student:', row.class_name);
+          socket.emit('class-info', { class_name: row.class_name, class_id: activeClass.id });
         }
+      });
+    } else {
+      // Send acknowledgment that student is connected and waiting for teacher
+      console.log('Sending waiting status to student (no active class yet)');
+      socket.emit('student-waiting', { 
+        message: 'Waiting for teacher to start class',
+        status: 'ready'
       });
     }
   });
