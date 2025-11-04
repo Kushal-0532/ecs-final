@@ -68,6 +68,9 @@ function App() {
     newSocket.on('connect', () => {
       console.log('✅ Connected to server');
       
+      // HARDCODE: Set class active immediately when connected
+      setClassActive(true);
+      
       // Emit student-join to register with the class
       newSocket.emit('student-join', {
         student_name: studentInfo.name,
