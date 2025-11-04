@@ -6,6 +6,7 @@ import sqlite3 from 'sqlite3';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs-extra';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { initLED, quickBlink, slowBlink, doubleBlink, cleanup } from './gpio.js';
 
@@ -488,6 +489,30 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     class_active: activeClass !== null,
     students_connected: connectedStudents.size
+  });
+});
+
+// Server discovery endpoint - helps clients find this server
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
+app.get('/api/server-info', (req, res) => {
+  res.json({
+    serverIp: getLocalIP(),
+    serverHostname: os.hostname(),
+    port: process.env.PORT || 3000,
+    status: 'running',
+    timestamp: new Date().toISOString()
   });
 });
 

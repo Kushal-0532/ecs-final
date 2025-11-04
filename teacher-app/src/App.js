@@ -6,6 +6,76 @@ import PollManager from './components/PollManager';
 import StudentList from './components/StudentList';
 import Transcription from './components/Transcription';
 
+/**
+ * Auto-detect server URL by trying multiple connection methods
+ */
+async function detectServerUrl() {
+  // Priority 1: Use explicit environment variable
+  if (process.env.REACT_APP_SERVER_URL) {
+    console.log('ℹ️ Using server URL from environment:', process.env.REACT_APP_SERVER_URL);
+    return process.env.REACT_APP_SERVER_URL;
+  }
+
+  // Priority 2: Try .local hostname (works with mDNS on all networks)
+  try {
+    console.log('🔍 Trying raspberrypi.local...');
+    const response = await Promise.race([
+      fetch('http://raspberrypi.local:3000/api/server-info'),
+      new Promise((_, reject) => setTimeout(() => reject('timeout'), 2000))
+    ]);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`✅ Found server at raspberrypi.local - IP: ${data.serverIp}`);
+      return 'http://raspberrypi.local:3000';
+    }
+  } catch (e) {
+    console.log('⚠️ raspberrypi.local not accessible:', e.message);
+  }
+
+  // Priority 3: Try localhost (in case server is on same machine)
+  try {
+    console.log('🔍 Trying localhost...');
+    const response = await Promise.race([
+      fetch('http://localhost:3000/api/server-info'),
+      new Promise((_, reject) => setTimeout(() => reject('timeout'), 2000))
+    ]);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`✅ Found server at localhost`);
+      return 'http://localhost:3000';
+    }
+  } catch (e) {
+    console.log('⚠️ localhost not accessible:', e.message);
+  }
+
+  // Priority 4: Try common gateway IPs (Raspberry Pi often gets first IP on network)
+  const commonIPs = ['192.168.1.1', '192.168.0.1', '10.0.0.1'];
+  for (const ip of commonIPs) {
+    try {
+      console.log(`🔍 Trying ${ip}...`);
+      const response = await Promise.race([
+        fetch(`http://${ip}:3000/api/server-info`),
+        new Promise((_, reject) => setTimeout(() => reject('timeout'), 1500))
+      ]);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`✅ Found server at ${ip} (${data.serverHostname})`);
+        return `http://${ip}:3000`;
+      }
+    } catch (e) {
+      // Continue to next IP
+    }
+  }
+
+  // Fallback: Default to .local (most likely to work)
+  console.warn('⚠️ Could not detect server. Using default: raspberrypi.local:3000');
+  console.warn('💡 Tip: You can set REACT_APP_SERVER_URL env var to specify server URL');
+  return 'http://raspberrypi.local:3000';
+}
+
 function App() {
   const [socket, setSocket] = useState(null);
   const [teacherId] = useState(`teacher-${Date.now()}`);
@@ -13,50 +83,66 @@ function App() {
   const [classId, setClassId] = useState(null);
   const [students, setStudents] = useState([]);
   const [activeTab, setActiveTab] = useState('session');
+  const [connectionStatus, setConnectionStatus] = useState('Detecting server...');
 
   useEffect(() => {
-    // Connect to server - use REACT_APP_SERVER_URL env var or default to localhost
-    const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:3000';
-    const newSocket = io(serverUrl, {
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5
+    // Auto-detect and connect to server
+    detectServerUrl().then(serverUrl => {
+      console.log(`📡 Connecting to: ${serverUrl}`);
+      setConnectionStatus('Connecting...');
+
+      const newSocket = io(serverUrl, {
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5
+      });
+
+      newSocket.on('connect', () => {
+        console.log('✅ Connected to server');
+        setConnectionStatus('Connected');
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.error('❌ Connection error:', error);
+        setConnectionStatus(`Connection Error: ${error.message}`);
+      });
+
+      newSocket.on('disconnect', () => {
+        console.log('⚠️ Disconnected from server');
+        setConnectionStatus('Disconnected');
+      });
+
+      newSocket.on('class-started', (data) => {
+        console.log('Class started:', data.class_id);
+        setClassId(data.class_id);
+        setClassActive(true);
+      });
+
+      newSocket.on('student-connected', (data) => {
+        console.log('Student connected:', data.student_name);
+        setStudents(prev => [...prev, {
+          id: data.student_id,
+          name: data.student_name
+        }]);
+      });
+
+      newSocket.on('student-disconnected', (data) => {
+        console.log('Student disconnected:', data.student_id);
+        setStudents(prev => prev.filter(s => s.id !== data.student_id));
+      });
+
+      newSocket.on('class-ended', () => {
+        setClassActive(false);
+        setStudents([]);
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        if (newSocket) newSocket.disconnect();
+      };
     });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to server');
-    });
-
-    newSocket.on('class-started', (data) => {
-      console.log('Class started:', data.class_id);
-      setClassId(data.class_id);
-      setClassActive(true);
-    });
-
-    newSocket.on('student-connected', (data) => {
-      console.log('Student connected:', data.student_name);
-      setStudents(prev => [...prev, {
-        id: data.student_id,
-        name: data.student_name
-      }]);
-    });
-
-    newSocket.on('student-disconnected', (data) => {
-      console.log('Student disconnected:', data.student_id);
-      setStudents(prev => prev.filter(s => s.id !== data.student_id));
-    });
-
-    newSocket.on('class-ended', () => {
-      setClassActive(false);
-      setStudents([]);
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      if (newSocket) newSocket.disconnect();
-    };
   }, []);
 
   const startClass = (className) => {
@@ -86,6 +172,15 @@ function App() {
           <h1>EduFlow Teacher</h1>
         </div>
         <div className="status">
+          <div style={{ marginBottom: '8px' }}>
+            {connectionStatus === 'Connected' ? (
+              <span className="status-active">🟢 {connectionStatus}</span>
+            ) : connectionStatus === 'Detecting server...' ? (
+              <span className="status-inactive">🔄 {connectionStatus}</span>
+            ) : (
+              <span className="status-inactive">🔴 {connectionStatus}</span>
+            )}
+          </div>
           {classActive ? (
             <span className="status-active">● Class Active (ID: {classId})</span>
           ) : (
